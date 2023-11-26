@@ -1,19 +1,33 @@
-#Swing Equation - Identification (Section III.C)
-#Python 3.7.X
-#TensorFlow 1.X
+#	Code developed based on the initial code by 
+#	Mazziar Raissi: https://maziarraissi.github.io/PINNs
+
+# 	@author: Georgios Misyris
+
+#When publishing results based on this data/code, please cite:
+#	G. Misyris, A. Venzke, S. Chatzivasileiadis, " Physics-Informed 
+#	Neural Networks for Power Systems", 2019. Available online: 
+#	https://arxiv.org/abs/1911.03737	
+
+
+
+
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
 from scipy.interpolate import griddata
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from tensorflow import keras
 import matplotlib.gridspec as gridspec
 import time
+import scipy.optimize as sopt
 import os
-
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+tf.compat.v1.disable_eager_execution()
 np.random.seed(1234)
-tf.set_random_seed(1234)
+tf.compat.v1.set_random_seed(1234)
 
 class PhysicsInformedNN:
     # Initialize the class
@@ -35,36 +49,34 @@ class PhysicsInformedNN:
         self.weights, self.biases = self.initialize_NN(layers)
         
         # tf placeholders and graph
-        self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
+        self.sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True,
                                                      log_device_placement=True))
         
         # Initialize parameters
         self.lambda_1 = tf.Variable([0.0], dtype=tf.float32)
         self.lambda_2 = tf.Variable([-6.0], dtype=tf.float32)
         
-        self.x_tf = tf.placeholder(tf.float32, shape=[None, self.x.shape[1]])
-        self.t_tf = tf.placeholder(tf.float32, shape=[None, self.t.shape[1]])
-        self.u_tf = tf.placeholder(tf.float32, shape=[None, self.u.shape[1]])
+        self.x_tf = tf.compat.v1.placeholder(tf.float32, shape=[None, self.x.shape[1]])
+        self.t_tf = tf.compat.v1.placeholder(tf.float32, shape=[None, self.t.shape[1]])
+        self.u_tf = tf.compat.v1.placeholder(tf.float32, shape=[None, self.u.shape[1]])
                 
         self.u_pred = self.net_u(self.x_tf, self.t_tf)
         self.f_pred = self.net_f(self.x_tf, self.t_tf)
         
-        self.loss = tf.reduce_mean(tf.square(self.u_tf - self.u_pred)) + \
-                    tf.reduce_mean(tf.square(self.f_pred))
+        self.loss = tf.reduce_mean(input_tensor=tf.square(self.u_tf - self.u_pred)) + \
+                    tf.reduce_mean(input_tensor=tf.square(self.f_pred))
         
-        self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss, 
-                                                                method = 'L-BFGS-B', 
-                                                                options = {'maxiter': 50000,
+        self.optimizer = sopt.minimize(self.loss, method = 'L-BFGS-B', options = {'maxiter': 50000,
                                                                            'maxfun': 50000,
                                                                            'maxcor': 50,
                                                                            'maxls': 50,
                                                                            'ftol' : 1.0 * np.finfo(float).eps})
 
     
-        self.optimizer_Adam = tf.train.AdamOptimizer()
+        self.optimizer_Adam = tf.compat.v1.train.AdamOptimizer()
         self.train_op_Adam = self.optimizer_Adam.minimize(self.loss)
         
-        init = tf.global_variables_initializer()
+        init = tf.compat.v1.global_variables_initializer()
         self.sess.run(init)
 
     def initialize_NN(self, layers):        
@@ -82,7 +94,7 @@ class PhysicsInformedNN:
         in_dim = size[0]
         out_dim = size[1]        
         xavier_stddev = np.sqrt(2/(in_dim + out_dim))
-        return tf.Variable(tf.truncated_normal([in_dim, out_dim], stddev=xavier_stddev), dtype=tf.float32)
+        return tf.Variable(tf.random.truncated_normal([in_dim, out_dim], stddev=xavier_stddev), dtype=tf.float32)
     
     def neural_net(self, X, weights, biases):
         num_layers = len(weights) + 1
@@ -108,8 +120,8 @@ class PhysicsInformedNN:
         u = self.net_u(x,t)
 
         
-        u_t = tf.gradients(u, t)[0]
-        u_tt = tf.gradients(u_t, t)[0]
+        u_t = tf.gradients(ys=u, xs=t)[0]
+        u_tt = tf.gradients(ys=u_t, xs=t)[0]
         f = lambda_1*u_tt + lambda_2*u_t + self.nu*tf.math.sin(u) - x
         
         return f
@@ -203,11 +215,3 @@ if __name__ == "__main__":
     print('Error u: %e' % (error_u))    
     print('Error l1: %.5f%%' % (error_lambda_1))                             
     print('Error l2: %.5f%%' % (error_lambda_2))  
-    
-                        
-
- 
-    
-
-
-

@@ -1,0 +1,34 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 1 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: continuous_time_inference/swingEquation_inference.py
+--------------------------------------------------------------------------------
+continuous_time_inference/swingEquation_inference.py:66:25: ERROR: Using member tf.contrib.opt.ScipyOptimizerInterface in deprecated module tf.contrib. tf.contrib.opt.ScipyOptimizerInterface cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'continuous_time_inference/swingEquation_inference.py'
+ outputting to 'continuous_time_inference/swingEquation_inference_v2.py'
+--------------------------------------------------------------------------------
+
+27:0: INFO: Renamed 'tf.set_random_seed' to 'tf.compat.v1.set_random_seed'
+49:20: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+49:38: INFO: Renamed 'tf.ConfigProto' to 'tf.compat.v1.ConfigProto'
+56:20: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+57:20: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+58:20: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+63:20: INFO: Added keywords to args of function 'tf.reduce_mean'
+64:20: INFO: Added keywords to args of function 'tf.reduce_mean'
+66:25: ERROR: Using member tf.contrib.opt.ScipyOptimizerInterface in deprecated module tf.contrib. tf.contrib.opt.ScipyOptimizerInterface cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+75:30: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+78:15: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+96:27: INFO: Renamed 'tf.truncated_normal' to 'tf.random.truncated_normal'
+122:14: INFO: Added keywords to args of function 'tf.gradients'
+123:15: INFO: Added keywords to args of function 'tf.gradients'
+--------------------------------------------------------------------------------
+
